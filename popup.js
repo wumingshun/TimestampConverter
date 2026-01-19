@@ -93,10 +93,9 @@ class TimestampConverter {
     }
 
     if (timestampInput) {
-      timestampInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          this.convert();
-        }
+      // 输入时自动转换
+      timestampInput.addEventListener('input', () => {
+        this.convert();
       });
     }
 
