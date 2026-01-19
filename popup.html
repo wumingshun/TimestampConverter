@@ -63,11 +63,22 @@
       </div>
     </div>
 
+    <script>
+      // 立即显示当前时间戳，不等待任何加载
+      (function() {
+        var now = Date.now();
+        var secondEl = document.getElementById('current-second');
+        var millisecondEl = document.getElementById('current-millisecond');
+        if (secondEl) secondEl.textContent = Math.floor(now / 1000);
+        if (millisecondEl) millisecondEl.textContent = now;
+      })();
+    </script>
+
     <div class="footer">
       <p>选中网页中的时间戳自动转换</p>
     </div>
   </div>
 
-  <script src="popup.js"></script>
+  <script src="popup.js" defer></script>
 </body>
 </html>

@@ -4,12 +4,29 @@ class TimestampConverter {
     this.init();
   }
 
-  async init() {
-    await this.getCurrentDomain();
-    await this.loadSettings();
+  init() {
+    // DOM 加载后立即更新时间戳，不等待任何异步操作
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.updateCurrentTimestamps();
+      });
+    } else {
+      this.updateCurrentTimestamps();
+    }
+
+    // 立即绑定事件
     this.bindEvents();
-    this.updateCurrentTimestamps();
+
+    // 启动定时器
     setInterval(() => this.updateCurrentTimestamps(), 1000);
+
+    // 异步加载设置，不阻塞界面显示
+    Promise.all([
+      this.getCurrentDomain(),
+      this.loadSettings()
+    ]).catch(err => {
+      console.error('初始化失败:', err);
+    });
   }
 
   async getCurrentDomain() {
@@ -18,8 +35,10 @@ class TimestampConverter {
       if (tab && tab.url) {
         const url = new URL(tab.url);
         this.domain = url.hostname;
-        document.getElementById('current-domain').textContent = this.domain;
-        document.getElementById('domain-info').style.display = 'block';
+        const domainElement = document.getElementById('current-domain');
+        const domainInfo = document.getElementById('domain-info');
+        if (domainElement) domainElement.textContent = this.domain;
+        if (domainInfo) domainInfo.style.display = 'block';
       }
     } catch (err) {
       console.error('获取域名失败:', err);
@@ -33,7 +52,7 @@ class TimestampConverter {
       const isEnabled = settings[this.domain] || false;
 
       const toggle = document.getElementById('auto-scan-toggle');
-      toggle.checked = isEnabled;
+      if (toggle) toggle.checked = isEnabled;
 
       // 通知 content script 当前页面的设置
       this.notifyContentScript(isEnabled);
@@ -79,17 +98,23 @@ class TimestampConverter {
     const timestampInput = document.getElementById('timestamp-input');
     const autoScanToggle = document.getElementById('auto-scan-toggle');
 
-    convertBtn.addEventListener('click', () => this.convert());
-    timestampInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        this.convert();
-      }
-    });
+    if (convertBtn) {
+      convertBtn.addEventListener('click', () => this.convert());
+    }
 
-    // 自动扫描开关
-    autoScanToggle.addEventListener('change', (e) => {
-      this.saveSettings(e.target.checked);
-    });
+    if (timestampInput) {
+      timestampInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          this.convert();
+        }
+      });
+    }
+
+    if (autoScanToggle) {
+      autoScanToggle.addEventListener('change', (e) => {
+        this.saveSettings(e.target.checked);
+      });
+    }
 
     // 复制按钮
     document.querySelectorAll('.copy-btn').forEach(btn => {
@@ -157,6 +182,10 @@ class TimestampConverter {
     const resultValue = document.getElementById('result-value');
     const resultType = document.getElementById('result-type');
 
+    if (!input || !resultGroup || !resultValue || !resultType) {
+      return;
+    }
+
     const text = input.value.trim();
 
     if (!text) {
@@ -181,13 +210,18 @@ class TimestampConverter {
   updateCurrentTimestamps() {
     const now = Date.now();
 
-    document.getElementById('current-second').textContent = Math.floor(now / 1000);
-    document.getElementById('current-millisecond').textContent = now;
+    const secondElement = document.getElementById('current-second');
+    const millisecondElement = document.getElementById('current-millisecond');
+
+    if (secondElement) secondElement.textContent = Math.floor(now / 1000);
+    if (millisecondElement) millisecondElement.textContent = now;
   }
 
   copyToClipboard(btn) {
     const targetId = btn.getAttribute('data-target');
     const element = document.getElementById(targetId);
+    if (!element) return;
+
     const text = element.textContent;
 
     navigator.clipboard.writeText(text).then(() => {

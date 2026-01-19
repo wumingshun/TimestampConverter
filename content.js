@@ -5,6 +5,10 @@ class UnixTimestampConverter {
     this.autoTooltips = new Map();
     this.isScanning = false;
     this.debounceTimer = null;
+    this.pendingScan = false;
+    this.scanQueueTimer = null;
+    this.lastScanTime = 0;
+    this.minScanInterval = 1000; // 最小扫描间隔 1 秒
     this.init();
   }
 
@@ -51,7 +55,7 @@ class UnixTimestampConverter {
         );
 
         if (hasNodeChanges) {
-          this.debounceAutoScan();
+          this.queueAutoScan();
         }
       });
 
@@ -70,6 +74,33 @@ class UnixTimestampConverter {
       this.observer = null;
     }
     this.clearAutoTooltips();
+    this.clearTimers();
+  }
+
+  clearTimers() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
+    if (this.scanQueueTimer) {
+      clearTimeout(this.scanQueueTimer);
+      this.scanQueueTimer = null;
+    }
+  }
+
+  queueAutoScan() {
+    // 清除之前的定时器
+    if (this.scanQueueTimer) {
+      clearTimeout(this.scanQueueTimer);
+    }
+
+    // 设置新的定时器，确保至少等待最小间隔
+    const timeSinceLastScan = Date.now() - this.lastScanTime;
+    const waitTime = Math.max(this.minScanInterval - timeSinceLastScan, 100);
+
+    this.scanQueueTimer = setTimeout(() => {
+      this.autoScanPage();
+    }, waitTime);
   }
 
   debounceAutoScan() {
@@ -109,19 +140,34 @@ class UnixTimestampConverter {
   autoScanPage() {
     // 防止重复扫描
     if (this.isScanning) {
+      this.pendingScan = true;
+      return;
+    }
+
+    // 检查扫描间隔
+    const timeSinceLastScan = Date.now() - this.lastScanTime;
+    if (timeSinceLastScan < this.minScanInterval) {
+      // 距离上次扫描太近，延后执行
+      this.queueAutoScan();
       return;
     }
 
     this.isScanning = true;
+    this.lastScanTime = Date.now();
 
-    // 使用 requestAnimationFrame 分片处理
-    requestAnimationFrame(() => {
+    // 使用 setTimeout 让出主线程，避免阻塞
+    setTimeout(() => {
       try {
-        // 查找页面中的时间戳（限制扫描数量）
-        const textNodes = this.findTextNodes(document.body, 1000);
+        // 只扫描可见区域附近的内容
+        const textNodes = this.findVisibleTextNodes();
         const timestampRegex = /\b\d{10,19}\b/g;
 
-        textNodes.forEach(node => {
+        let scannedCount = 0;
+        const maxPerScan = 100; // 每次最多扫描 100 个节点
+
+        textNodes.some(node => {
+          if (scannedCount >= maxPerScan) return true;
+
           const text = node.textContent;
           const matches = text.matchAll(timestampRegex);
 
@@ -134,39 +180,65 @@ class UnixTimestampConverter {
               this.showAutoTooltip(node, match, readableTime);
             }
           }
+
+          scannedCount++;
+          return false;
         });
+
+        // 如果还有未扫描的节点，稍后继续
+        if (textNodes.length > maxPerScan && this.pendingScan) {
+          this.queueAutoScan();
+        }
+      } catch (err) {
+        console.error('扫描失败:', err);
       } finally {
         this.isScanning = false;
+        this.pendingScan = false;
       }
-    });
+    }, 0);
   }
 
-  findTextNodes(element, maxNodes = 1000) {
+  findVisibleTextNodes() {
     const textNodes = [];
+    const viewportHeight = window.innerHeight;
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
     const walker = document.createTreeWalker(
-      element,
+      document.body,
       NodeFilter.SHOW_TEXT,
       {
         acceptNode: (node) => {
           // 跳过已处理的节点和空节点
-          if (node.parentNode.tagName === 'SCRIPT' ||
-              node.parentNode.tagName === 'STYLE' ||
-              node.parentNode.tagName === 'NOSCRIPT' ||
-              !node.textContent.trim()) {
+          const parent = node.parentNode;
+          if (parent.tagName === 'SCRIPT' ||
+              parent.tagName === 'STYLE' ||
+              parent.tagName === 'NOSCRIPT' ||
+              parent.classList?.contains('unix-timestamp-tooltip')) {
             return NodeFilter.FILTER_REJECT;
           }
+
+          const text = node.textContent.trim();
+          if (!text) {
+            return NodeFilter.FILTER_REJECT;
+          }
+
           // 检查是否包含数字
-          if (!/\d{10,19}/.test(node.textContent)) {
+          if (!/\d{10,19}/.test(text)) {
             return NodeFilter.FILTER_REJECT;
           }
+
           return NodeFilter.FILTER_ACCEPT;
         }
       }
     );
 
     let node;
-    while ((node = walker.nextNode()) && textNodes.length < maxNodes) {
+    let count = 0;
+    const maxTotal = 500; // 总共最多收集 500 个节点
+
+    while ((node = walker.nextNode()) && count < maxTotal) {
       textNodes.push(node);
+      count++;
     }
 
     return textNodes;
@@ -220,7 +292,7 @@ class UnixTimestampConverter {
 
       // 自动提示只在页面显示，不自动消失
     } catch (err) {
-      console.error('创建自动提示失败:', err);
+      // 忽略错误，继续处理其他节点
     }
   }
 
