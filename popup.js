@@ -5,28 +5,18 @@ class TimestampConverter {
   }
 
   init() {
-    // DOM 加载后立即更新时间戳，不等待任何异步操作
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.updateCurrentTimestamps();
-      });
-    } else {
-      this.updateCurrentTimestamps();
-    }
-
-    // 立即绑定事件
+    // 立即绑定事件，不等待
     this.bindEvents();
 
-    // 启动定时器
-    setInterval(() => this.updateCurrentTimestamps(), 1000);
-
-    // 异步加载设置，不阻塞界面显示
-    Promise.all([
-      this.getCurrentDomain(),
-      this.loadSettings()
-    ]).catch(err => {
-      console.error('初始化失败:', err);
-    });
+    // 所有异步操作延迟执行，不阻塞页面显示
+    setTimeout(() => {
+      Promise.all([
+        this.getCurrentDomain(),
+        this.loadSettings()
+      ]).catch(err => {
+        console.error('初始化失败:', err);
+      });
+    }, 0);
   }
 
   async getCurrentDomain() {
@@ -205,16 +195,6 @@ class TimestampConverter {
       resultType.textContent = '请检查输入';
       resultGroup.style.display = 'block';
     }
-  }
-
-  updateCurrentTimestamps() {
-    const now = Date.now();
-
-    const secondElement = document.getElementById('current-second');
-    const millisecondElement = document.getElementById('current-millisecond');
-
-    if (secondElement) secondElement.textContent = Math.floor(now / 1000);
-    if (millisecondElement) millisecondElement.textContent = now;
   }
 
   copyToClipboard(btn) {
