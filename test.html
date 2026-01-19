@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix时间戳转换器 - 测试页面</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .instructions {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+    }
+
+    .instructions h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .instructions p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .section {
+      margin-bottom: 35px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(180deg, #667eea, #764ba2);
+      border-radius: 2px;
+    }
+
+    .timestamp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .timestamp-item {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      user-select: text;
+    }
+
+    .timestamp-item:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #667eea;
+    }
+
+    .timestamp-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .timestamp-value {
+      font-size: 18px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      color: #333;
+      word-break: break-all;
+      font-weight: 500;
+    }
+
+    .test-area {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .test-area h3 {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .random-timestamp {
+      font-size: 24px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      color: #667eea;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: text;
+    }
+
+    .random-timestamp:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #999;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .timestamp-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🕐 Unix时间戳转换器</h1>
+    <p class="subtitle">选中任意时间戳，自动转换为可读时间</p>
+
+    <div class="instructions">
+      <h2>使用说明</h2>
+      <p>✓ 在 Chrome 浏览器中加载本插件</p>
+      <p>✓ 鼠标选中下方任意时间戳</p>
+      <p>✓ 插件会自动识别并在文本上方显示转换结果（东八区时间）</p>
+      <p>✓ 提示框会在 3 秒后自动消失</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">秒级时间戳 (10位)</h2>
+      <div class="timestamp-grid">
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1704067200" data-type="second">加载中...</div>
+          <div class="timestamp-value">1704067200</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1735689599" data-type="second">加载中...</div>
+          <div class="timestamp-value">1735689599</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1893456000" data-type="second">加载中...</div>
+          <div class="timestamp-value">1893456000</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="0" data-type="second">加载中...</div>
+          <div class="timestamp-value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">毫秒级时间戳 (13位)</h2>
+      <div class="timestamp-grid">
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1704067200000" data-type="millisecond">加载中...</div>
+          <div class="timestamp-value">1704067200000</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1737210847891" data-type="millisecond">加载中...</div>
+          <div class="timestamp-value">1737210847891</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1893456000000" data-type="millisecond">加载中...</div>
+          <div class="timestamp-value">1893456000000</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label">当前时间（毫秒）</div>
+          <div class="timestamp-value" id="current-ms">1737210847891</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">微秒级时间戳 (16位)</h2>
+      <div class="timestamp-grid">
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1704067200000000" data-type="microsecond">加载中...</div>
+          <div class="timestamp-value">1704067200000000</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1893456000000000" data-type="microsecond">加载中...</div>
+          <div class="timestamp-value">1893456000000000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">纳秒级时间戳 (19位)</h2>
+      <div class="timestamp-grid">
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1704067200000000000" data-type="nanosecond">加载中...</div>
+          <div class="timestamp-value">1704067200000000000</div>
+        </div>
+        <div class="timestamp-item" title="点击选中">
+          <div class="timestamp-label" data-ts="1893456000000000000" data-type="nanosecond">加载中...</div>
+          <div class="timestamp-value">1893456000000000000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">随机测试</h2>
+      <div class="test-area">
+        <h3>点击下方数字选中，或点击按钮生成新时间戳</h3>
+        <div class="random-timestamp" id="random-timestamp" title="点击选中">1704067200000</div>
+        <button class="button" onclick="generateRandomTimestamp()">生成随机时间戳</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>💡 提示：支持秒、毫秒、微秒、纳秒四种时间戳格式自动识别</p>
+    </div>
+  </div>
+
+  <script>
+    // 格式化时间为东八区
+    function formatToEast8Time(timestamp) {
+      const date = new Date(timestamp);
+      const formatter = new Intl.DateTimeFormat('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Shanghai'
+      });
+      return formatter.format(date);
+    }
+
+    // 更新当前毫秒时间戳
+    function updateCurrentTimestamp() {
+      const now = Date.now();
+      const element = document.getElementById('current-ms');
+      element.textContent = now;
+      element.title = formatToEast8Time(now);
+    }
+
+    // 生成随机时间戳（支持秒、毫秒、微秒、纳秒四种格式）
+    function generateRandomTimestamp() {
+      const types = [
+        { name: '秒', multiplier: 1, min: 10, max: 10 },
+        { name: '毫秒', multiplier: 1000, min: 13, max: 13 },
+        { name: '微秒', multiplier: 1000000, min: 16, max: 16 },
+        { name: '纳秒', multiplier: 1000000, min: 19, max: 19 }
+      ];
+
+      const type = types[Math.floor(Math.random() * types.length)];
+      const now = Date.now();
+      const randomOffset = Math.floor(Math.random() * 315360000000) - 157680000000; // +/- 5年
+
+      let timestamp = (now + randomOffset) * type.multiplier;
+
+      // 对于微秒和纳秒，添加随机的小数部分
+      if (type.name === '微秒') {
+        timestamp += Math.floor(Math.random() * 1000);
+      } else if (type.name === '纳秒') {
+        timestamp += Math.floor(Math.random() * 1000000);
+      }
+
+      const element = document.getElementById('random-timestamp');
+      element.textContent = timestamp;
+      element.title = formatToEast8Time(timestamp / type.multiplier);
+
+      // 高亮动画
+      element.style.transform = 'scale(1.1)';
+      element.style.background = '#667eea';
+      element.style.color = 'white';
+      setTimeout(() => {
+        element.style.transform = 'scale(1)';
+        element.style.background = 'white';
+        element.style.color = '#667eea';
+      }, 200);
+    }
+
+    // 初始化页面，为所有时间戳添加正确的东八区时间标签
+    function initTimestampLabels() {
+      const labels = document.querySelectorAll('.timestamp-label[data-ts]');
+      labels.forEach(label => {
+        const ts = parseInt(label.getAttribute('data-ts'), 10);
+        const type = label.getAttribute('data-type');
+
+        let multiplier = 1;
+        switch(type) {
+          case 'second':
+            multiplier = 1000;
+            break;
+          case 'millisecond':
+            multiplier = 1;
+            break;
+          case 'microsecond':
+            multiplier = 0.001;
+            break;
+          case 'nanosecond':
+            multiplier = 0.000001;
+            break;
+        }
+
+        const east8Time = formatToEast8Time(ts * multiplier);
+        label.textContent = east8Time;
+      });
+    }
+
+    // 初始化
+    initTimestampLabels();
+    updateCurrentTimestamp();
+    generateRandomTimestamp();
+
+    // 每秒更新当前时间戳
+    setInterval(updateCurrentTimestamp, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unix时间戳转换器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🕐 Unix时间戳转换器</h1>
+    </div>
+
+    <div class="toggle-section">
+      <div class="toggle-item">
+        <div class="toggle-info">
+          <span class="toggle-label">当前页面自动扫描</span>
+          <span class="toggle-desc">自动转换页面中的时间戳</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="auto-scan-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="domain-info" id="domain-info" style="display: none;">
+        <span class="domain-label">当前域名: </span>
+        <span class="domain-value" id="current-domain">-</span>
+      </div>
+    </div>
+
+    <div class="converter-section">
+      <div class="input-group">
+        <label for="timestamp-input">输入Unix时间戳</label>
+        <input
+          type="text"
+          id="timestamp-input"
+          placeholder="例如: 1704067200"
+          autocomplete="off"
+        >
+        <p class="hint">支持秒、毫秒、微秒、纳秒级时间戳</p>
+      </div>
+
+      <div class="result-group" id="result-group" style="display: none;">
+        <label>转换结果（东八区）</label>
+        <div class="result-value" id="result-value">2024-01-01 08:00:00</div>
+        <div class="result-type" id="result-type">秒级时间戳</div>
+      </div>
+
+      <button class="convert-btn" id="convert-btn">转换</button>
+    </div>
+
+    <div class="quick-section">
+      <div class="quick-item">
+        <span class="quick-label">当前时间戳（秒）</span>
+        <span class="quick-value" id="current-second">-</span>
+        <button class="copy-btn" data-target="current-second">复制</button>
+      </div>
+      <div class="quick-item">
+        <span class="quick-label">当前时间戳（毫秒）</span>
+        <span class="quick-value" id="current-millisecond">-</span>
+        <button class="copy-btn" data-target="current-millisecond">复制</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>选中网页中的时间戳自动转换</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
