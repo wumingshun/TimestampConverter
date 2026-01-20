@@ -4,50 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Unix时间戳转换器</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{width:400px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
-    .container{background:white;padding:16px}
-    .header{text-align:center;margin-bottom:20px}
-    .header h1{font-size:20px;color:#333;font-weight:600}
-    .toggle-section{background:#f8f9fa;padding:15px 18px;border-radius:12px;margin-bottom:20px}
-    .toggle-item{display:flex;align-items:center;justify-content:space-between}
-    .toggle-info{flex:1}
-    .toggle-label{display:block;font-size:14px;color:#333;font-weight:500;margin-bottom:4px}
-    .toggle-desc{display:block;font-size:12px;color:#999}
-    .toggle-switch{position:relative;width:50px;height:26px;margin-left:15px}
-    .toggle-switch input{opacity:0;width:0;height:0}
-    .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:26px}
-    .toggle-slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:white;border-radius:50%}
-    .toggle-switch input:checked+.toggle-slider{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
-    .toggle-switch input:checked+.toggle-slider:before{transform:translateX(24px)}
-    .domain-info{margin-top:12px;padding-top:12px;border-top:1px solid #e9ecef;font-size:12px}
-    .domain-value{color:#667eea;font-family:monospace}
-    .converter-section{background:#f8f9fa;padding:14px;border-radius:12px;margin-bottom:14px}
-    .input-group{margin-bottom:3px}
-    .input-group label{display:block;font-size:14px;color:#666;margin-bottom:4px;font-weight:500}
-    .input-group input{width:100%;padding:3px 4px;border:2px solid #e9ecef;border-radius:8px;font-size:16px;font-family:monospace}
-    .input-group input:focus{outline:none;border-color:#667eea}
-    .input-group .hint{font-size:12px;color:#999;margin-top:6px}
-    .result-group{background:white;padding:15px;border-radius:8px;margin-bottom:15px;border-left:4px solid #667eea;display:none}
-    .result-group label{display:block;font-size:12px;color:#999;margin-bottom:6px}
-    .result-value{font-size:22px;font-weight:600;color:#333;margin-bottom:6px;font-family:monospace}
-    .result-type{font-size:12px;color:#667eea;font-weight:500}
-    .convert-btn{width:100%;padding:14px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer}
-    .quick-section{background:#f8f9fa;padding:14px;border-radius:12px}
-    .quick-item{display:flex;align-items:center;padding:10px;background:white;border-radius:8px;margin-bottom:8px}
-    .quick-item:last-child{margin-bottom:0}
-    .quick-label{flex:1;font-size:13px;color:#666}
-    .quick-value{flex:2;font-family:monospace;font-size:14px;color:#333;text-align:right;margin-right:12px}
-    .copy-btn{padding:6px 12px;background:#667eea;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer}
-    .footer{text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #e9ecef}
-    .footer p{font-size:12px;color:#999}
-    .datetime-inputs{display:flex;align-items:center;gap:1px;flex-wrap:nowrap}
-    .dt-input{width:10px;padding:2px 1px;border:1px solid #e9ecef;border-radius:2px;font-size:14px;font-family:monospace;text-align:center}
-    .dt-input:focus{outline:none;border-color:#667eea}
-    .year-input{width:68px}
-    .dt-separator{font-size:14px;font-weight:600;color:#999;user-select:none;line-height:1;padding:0}
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <div class="container">
@@ -95,20 +52,13 @@
 
     <div class="converter-section">
       <div class="input-group">
-        <label for="datetime-input">选择日期时间（东八区）</label>
-        <div class="datetime-inputs">
-          <input type="text" id="year-input" maxlength="4" placeholder="年" class="dt-input year-input" autocomplete="off">
-          <span class="dt-separator">-</span>
-          <input type="text" id="month-input" maxlength="2" placeholder="月" class="dt-input month-input" autocomplete="off">
-          <span class="dt-separator">-</span>
-          <input type="text" id="day-input" maxlength="2" placeholder="日" class="dt-input day-input" autocomplete="off">
-          <span class="dt-separator"> </span>
-          <input type="text" id="hour-input" maxlength="2" placeholder="时" class="dt-input hour-input" autocomplete="off">
-          <span class="dt-separator">:</span>
-          <input type="text" id="minute-input" maxlength="2" placeholder="分" class="dt-input minute-input" autocomplete="off">
-          <span class="dt-separator">:</span>
-          <input type="text" id="second-input" maxlength="2" placeholder="秒" class="dt-input second-input" autocomplete="off">
-        </div>
+        <label for="datetime-input">输入日期时间（东八区）</label>
+        <input
+          type="text"
+          id="datetime-input"
+          placeholder="例如: 2024-01-01 08:00:00"
+          autocomplete="off"
+        >
         <p class="hint">将可读时间转换为 Unix 秒级时间戳（支持粘贴）</p>
       </div>
 
