@@ -5,7 +5,7 @@
 }
 
 body {
-  width: 380px;
+  width: 320px;
   min-height: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -15,20 +15,20 @@ body {
 .container {
   background: white;
   min-height: 100%;
-  padding: 20px;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
 .header h1 {
-  font-size: 22px;
+  font-size: 18px;
   color: #333;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -38,10 +38,10 @@ body {
 
 .toggle-section {
   background: white;
-  padding: 18px;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
 }
 
@@ -57,15 +57,15 @@ body {
 
 .toggle-label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .toggle-desc {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
 }
 
@@ -133,93 +133,88 @@ body {
 
 .converter-section {
   background: white;
-  padding: 18px;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
 }
 
 .input-group {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .input-group label {
   display: block;
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
 }
 
 .input-group input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 14px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   transition: border-color 0.3s ease;
 }
 
-.input-group input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
 .input-group .hint {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .result-group {
   background: white;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  border-left: 4px solid #667eea;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border-left: 3px solid #667eea;
 }
 
 .result-group label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
 
 .result-group .result-value {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   color: #333;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
 .result-group .result-type {
-  font-size: 12px;
+  font-size: 11px;
   color: #667eea;
   font-weight: 500;
 }
 
 .convert-btn {
   width: 100%;
-  padding: 14px;
+  padding: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .convert-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .convert-btn:active {
@@ -228,20 +223,20 @@ body {
 
 .quick-section {
   background: white;
-  padding: 18px;
-  border-radius: 14px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
 }
 
 .quick-item {
   display: flex;
   align-items: center;
-  padding: 12px 14px;
+  padding: 8px 10px;
   background: #f8f9fa;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
   transition: all 0.2s ease;
   border: 1px solid transparent;
 }
@@ -250,7 +245,7 @@ body {
   background: #e9ecef;
   border-color: #667eea;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.12);
 }
 
 .quick-item:last-child {
@@ -259,104 +254,50 @@ body {
 
 .quick-label {
   flex: 1;
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
 }
 
 .quick-value {
   flex: 2;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   text-align: right;
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
 .copy-btn {
-  padding: 8px 14px;
+  padding: 6px 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 12px;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
 }
 
 .copy-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 3px 8px rgba(102, 126, 234, 0.35);
 }
 
 .copy-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.25);
 }
 
 .footer {
   text-align: center;
-  margin-top: 20px;
-  padding-top: 15px;
+  margin-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid #e9ecef;
 }
 
 .footer p {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
-}
-
-/* 日期时间输入框样式 */
-.datetime-inputs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  width: 100%;
-}
-
-.dt-input {
-  padding: 12px 8px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  text-align: center;
-  transition: all 0.3s ease;
-  min-width: 45px;
-  height: 42px;
-  box-sizing: border-box;
-  line-height: normal;
-  overflow: visible;
-}
-
-.dt-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.year-input {
-  width: 75px;
-}
-
-.month-input,
-.day-input,
-.hour-input,
-.minute-input,
-.second-input {
-  width: 50px;
-}
-
-.dt-separator {
-  font-size: 16px;
-  font-weight: 600;
-  color: #999;
-  user-select: none;
-  padding: 0 2px;
-  line-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
