@@ -87,7 +87,6 @@ class TimestampConverter {
     const convertBtn = document.getElementById('convert-btn');
     const timestampInput = document.getElementById('timestamp-input');
     const autoScanToggle = document.getElementById('auto-scan-toggle');
-    const datetimeInput = document.getElementById('datetime-input');
 
     if (convertBtn) {
       convertBtn.addEventListener('click', () => this.convert());
@@ -100,19 +99,52 @@ class TimestampConverter {
       });
     }
 
-    if (datetimeInput) {
+    // 绑定日期时间输入框事件
+    const yearInput = document.getElementById('year-input');
+    const monthInput = document.getElementById('month-input');
+    const dayInput = document.getElementById('day-input');
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
+    const secondInput = document.getElementById('second-input');
+
+    const inputs = [yearInput, monthInput, dayInput, hourInput, minuteInput, secondInput];
+    const nextInputs = [monthInput, dayInput, hourInput, minuteInput, secondInput, null];
+
+    inputs.forEach((input, index) => {
+      if (!input) return;
+
       // 输入时自动转换
-      datetimeInput.addEventListener('input', () => {
+      input.addEventListener('input', (e) => {
+        // 输入满最大长度后自动跳转到下一个输入框
+        if (e.target.value.length >= e.target.maxLength && nextInputs[index]) {
+          nextInputs[index].focus();
+        }
         this.convertReverse();
       });
 
-      // 延迟检查，确保 popup-init.js 已完成默认值设置
-      setTimeout(() => {
-        if (datetimeInput.value) {
-          this.convertReverse();
+      // 处理退格键：如果当前输入框为空，则跳转到上一个输入框
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+          e.preventDefault();
+          inputs[index - 1].focus();
         }
-      }, 0);
-    }
+      });
+
+      // 处理粘贴事件
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        if (!text) return;
+        this.parseAndFillDateTime(text);
+      });
+    });
+
+    // 延迟检查，确保 popup-init.js 已完成默认值设置
+    setTimeout(() => {
+      if (yearInput && yearInput.value) {
+        this.convertReverse();
+      }
+    }, 0);
 
     if (autoScanToggle) {
       autoScanToggle.addEventListener('change', (e) => {
@@ -248,41 +280,124 @@ class TimestampConverter {
     });
   }
 
+  parseAndFillDateTime(text) {
+    // 支持多种格式的时间字符串
+    // 2024-01-01 12:00:00
+    // 2024/01/01 12:00:00
+    // 20240101120000
+    // 2024-01-01
+    // 2024/01/01
+    // 12:00:00
+    let date = null;
+    let time = null;
+
+    // 尝试匹配各种格式
+    const patterns = [
+      /(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2}):(\d{1,2})/,  // 2024-01-01 12:00:00
+      /(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{1,2})/,        // 2024-01-01 12:00
+      /(\d{4})[-/](\d{1,2})[-/](\d{1,2})/,                                 // 2024-01-01
+      /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,                          // 20240101120000
+      /(\d{1,2}):(\d{1,2}):(\d{1,2})/,                                       // 12:00:00
+      /(\d{1,2}):(\d{1,2})/                                                   // 12:00
+    ];
+
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        if (pattern === patterns[0]) {  // YYYY-MM-DD HH:MM:SS
+          date = { year: match[1], month: match[2], day: match[3] };
+          time = { hour: match[4], minute: match[5], second: match[6] };
+        } else if (pattern === patterns[1]) {  // YYYY-MM-DD HH:MM
+          date = { year: match[1], month: match[2], day: match[3] };
+          time = { hour: match[4], minute: match[5], second: '00' };
+        } else if (pattern === patterns[2]) {  // YYYY-MM-DD
+          date = { year: match[1], month: match[2], day: match[3] };
+        } else if (pattern === patterns[3]) {  // YYYYMMDDHHMMSS
+          date = { year: match[1], month: match[2], day: match[3] };
+          time = { hour: match[4], minute: match[5], second: match[6] };
+        } else if (pattern === patterns[4]) {  // HH:MM:SS
+          time = { hour: match[1], minute: match[2], second: match[3] };
+        } else if (pattern === patterns[5]) {  // HH:MM
+          time = { hour: match[1], minute: match[2], second: '00' };
+        }
+        break;
+      }
+    }
+
+    // 如果没有匹配到完整格式，尝试其他常见格式
+    if (!date && !time) {
+      // 尝试使用 Date 解析
+      const parsedDate = new Date(text);
+      if (!isNaN(parsedDate.getTime())) {
+        date = {
+          year: String(parsedDate.getFullYear()),
+          month: String(parsedDate.getMonth() + 1).padStart(2, '0'),
+          day: String(parsedDate.getDate()).padStart(2, '0')
+        };
+        time = {
+          hour: String(parsedDate.getHours()).padStart(2, '0'),
+          minute: String(parsedDate.getMinutes()).padStart(2, '0'),
+          second: String(parsedDate.getSeconds()).padStart(2, '0')
+        };
+      }
+    }
+
+    // 填充到输入框
+    if (date) {
+      const yearInput = document.getElementById('year-input');
+      const monthInput = document.getElementById('month-input');
+      const dayInput = document.getElementById('day-input');
+
+      if (yearInput) yearInput.value = date.year;
+      if (monthInput) monthInput.value = date.month;
+      if (dayInput) dayInput.value = date.day;
+    }
+
+    if (time) {
+      const hourInput = document.getElementById('hour-input');
+      const minuteInput = document.getElementById('minute-input');
+      const secondInput = document.getElementById('second-input');
+
+      if (hourInput) hourInput.value = time.hour;
+      if (minuteInput) minuteInput.value = time.minute;
+      if (secondInput) secondInput.value = time.second;
+    }
+
+    // 触发转换
+    this.convertReverse();
+  }
+
   convertReverse() {
-    const datetimeInput = document.getElementById('datetime-input');
+    const yearInput = document.getElementById('year-input');
+    const monthInput = document.getElementById('month-input');
+    const dayInput = document.getElementById('day-input');
+    const hourInput = document.getElementById('hour-input');
+    const minuteInput = document.getElementById('minute-input');
+    const secondInput = document.getElementById('second-input');
     const resultGroup = document.getElementById('reverse-result-group');
     const resultValue = document.getElementById('reverse-result-value');
     const resultType = document.getElementById('reverse-result-type');
 
-    if (!datetimeInput || !resultGroup || !resultValue || !resultType) {
+    if (!yearInput || !monthInput || !dayInput || !hourInput || !minuteInput || !secondInput || !resultGroup || !resultValue || !resultType) {
       return;
     }
 
-    const value = datetimeInput.value;
+    const year = yearInput.value.trim();
+    const month = monthInput.value.trim();
+    const day = dayInput.value.trim();
+    const hours = hourInput.value.trim();
+    const minutes = minuteInput.value.trim();
+    const seconds = secondInput.value.trim();
 
-    if (!value) {
+    // 检查是否所有输入框都有值
+    if (!year || !month || !day || !hours || !minutes || !seconds) {
       resultGroup.style.display = 'none';
-      return;
-    }
-
-    // 解析 datetime-local 的值（格式 YYYY-MM-DDTHH:mm:ss）
-    // 这个值不带时区，需要将其视为东八区时间
-    const [datePart, timePart] = value.split('T');
-    if (!datePart || !timePart) {
-      resultValue.textContent = '无效的日期时间';
-      resultType.textContent = '请检查输入';
-      resultGroup.style.display = 'block';
       return;
     }
 
     // 将东八区时间转换为 UTC 时间戳
     // 东八区时间 = UTC + 8 小时，所以 UTC = 东八区 - 8 小时
-    const [year, month, day] = datePart.split('-').map(Number);
-    const [hours, minutes, seconds] = timePart.split(':').map(Number);
-
-    // 创建时间对象，表示东八区时间
-    // 然后减去 8 小时，得到 UTC 时间
-    const east8Date = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    const east8Date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes), Number(seconds));
     const utcTimestamp = east8Date.getTime() - 8 * 3600 * 1000;
 
     if (isNaN(utcTimestamp)) {
