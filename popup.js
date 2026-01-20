@@ -87,6 +87,7 @@ class TimestampConverter {
     const convertBtn = document.getElementById('convert-btn');
     const timestampInput = document.getElementById('timestamp-input');
     const autoScanToggle = document.getElementById('auto-scan-toggle');
+    const datetimeInput = document.getElementById('datetime-input');
 
     if (convertBtn) {
       convertBtn.addEventListener('click', () => this.convert());
@@ -97,6 +98,18 @@ class TimestampConverter {
       timestampInput.addEventListener('input', () => {
         this.convert();
       });
+    }
+
+    if (datetimeInput) {
+      // 输入时自动转换
+      datetimeInput.addEventListener('input', () => {
+        this.convertReverse();
+      });
+
+      // 如果有默认值（当前时间），自动转换
+      if (datetimeInput.value) {
+        this.convertReverse();
+      }
     }
 
     if (autoScanToggle) {
@@ -152,6 +165,8 @@ class TimestampConverter {
 
   convertToEast8Time(timestamp) {
     const date = new Date(timestamp);
+
+    // 使用 Intl.DateTimeFormat 获取东八区时间
     const formatter = new Intl.DateTimeFormat('zh-CN', {
       year: 'numeric',
       month: '2-digit',
@@ -162,7 +177,20 @@ class TimestampConverter {
       hour12: false,
       timeZone: 'Asia/Shanghai'
     });
-    return formatter.format(date);
+
+    // 获取各部分并重新组合，确保使用 - 分隔符
+    const parts = formatter.formatToParts(date);
+    const year = parts.find(p => p.type === 'year')?.value;
+    const month = parts.find(p => p.type === 'month')?.value;
+    const day = parts.find(p => p.type === 'day')?.value;
+    const hour = parts.find(p => p.type === 'hour')?.value;
+    const minute = parts.find(p => p.type === 'minute')?.value;
+    const second = parts.find(p => p.type === 'second')?.value;
+
+    // 手动格式化，确保日期部分使用 - 分隔符
+    const dateStr = `${year}-${month}-${day}`;
+    const timeStr = `${hour}:${minute}:${second}`;
+    return `${dateStr} ${timeStr}`;
   }
 
   convert() {
@@ -215,6 +243,58 @@ class TimestampConverter {
     }).catch(err => {
       console.error('复制失败:', err);
     });
+  }
+
+  convertReverse() {
+    const datetimeInput = document.getElementById('datetime-input');
+    const resultGroup = document.getElementById('reverse-result-group');
+    const resultValue = document.getElementById('reverse-result-value');
+    const resultType = document.getElementById('reverse-result-type');
+
+    if (!datetimeInput || !resultGroup || !resultValue || !resultType) {
+      return;
+    }
+
+    const value = datetimeInput.value;
+
+    if (!value) {
+      resultGroup.style.display = 'none';
+      return;
+    }
+
+    // 解析 datetime-local 的值（格式 YYYY-MM-DDTHH:mm:ss）
+    // 这个值是东八区时间
+    const [datePart, timePart] = value.split('T');
+    if (!datePart || !timePart) {
+      resultValue.textContent = '无效的日期时间';
+      resultType.textContent = '请检查输入';
+      resultGroup.style.display = 'block';
+      return;
+    }
+
+    // 将东八区时间转换为 UTC 时间戳
+    // 东八区时间 = UTC + 8 小时
+    // 所以：UTC 时间 = 东八区时间 - 8 小时
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+
+    // 创建时间对象，表示东八区时间
+    // 然后减去 8 小时，得到 UTC 时间
+    const east8Date = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    const utcTimestamp = east8Date.getTime() - 8 * 3600 * 1000;
+
+    if (isNaN(utcTimestamp)) {
+      resultValue.textContent = '无效的日期时间';
+      resultType.textContent = '请检查输入';
+      resultGroup.style.display = 'block';
+      return;
+    }
+
+    // 转换为 Unix 秒级时间戳
+    const timestamp = Math.floor(utcTimestamp / 1000);
+    resultValue.textContent = timestamp;
+    resultType.textContent = '秒级时间戳';
+    resultGroup.style.display = 'block';
   }
 }
 

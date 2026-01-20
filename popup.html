@@ -88,6 +88,25 @@
       <button class="convert-btn" id="convert-btn" style="display:none">转换</button>
     </div>
 
+    <div class="converter-section">
+      <div class="input-group">
+        <label for="datetime-input">选择日期时间（东八区）</label>
+        <input
+          type="datetime-local"
+          id="datetime-input"
+          step="1"
+          autocomplete="off"
+        >
+        <p class="hint">将可读时间转换为 Unix 秒级时间戳</p>
+      </div>
+
+      <div class="result-group" id="reverse-result-group" style="display: none;">
+        <label>Unix 时间戳（秒）</label>
+        <div class="result-value" id="reverse-result-value">-</div>
+        <div class="result-type" id="reverse-result-type">秒级时间戳</div>
+      </div>
+    </div>
+
     <div class="quick-section">
       <div class="quick-item">
         <span class="quick-label">当前时间戳（秒）</span>
