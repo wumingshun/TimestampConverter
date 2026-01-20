@@ -106,10 +106,12 @@ class TimestampConverter {
         this.convertReverse();
       });
 
-      // 如果有默认值（当前时间），自动转换
-      if (datetimeInput.value) {
-        this.convertReverse();
-      }
+      // 延迟检查，确保 popup-init.js 已完成默认值设置
+      setTimeout(() => {
+        if (datetimeInput.value) {
+          this.convertReverse();
+        }
+      }, 0);
     }
 
     if (autoScanToggle) {
@@ -188,9 +190,10 @@ class TimestampConverter {
     const second = parts.find(p => p.type === 'second')?.value;
 
     // 手动格式化，确保日期部分使用 - 分隔符
-    const dateStr = `${year}-${month}-${day}`;
-    const timeStr = `${hour}:${minute}:${second}`;
-    return `${dateStr} ${timeStr}`;
+    // 使用空字符串拼接，避免减法运算
+    const dateStr = String(year) + '-' + String(month) + '-' + String(day);
+    const timeStr = String(hour) + ':' + String(minute) + ':' + String(second);
+    return dateStr + ' ' + timeStr;
   }
 
   convert() {
@@ -263,7 +266,7 @@ class TimestampConverter {
     }
 
     // 解析 datetime-local 的值（格式 YYYY-MM-DDTHH:mm:ss）
-    // 这个值是东八区时间
+    // 这个值不带时区，需要将其视为东八区时间
     const [datePart, timePart] = value.split('T');
     if (!datePart || !timePart) {
       resultValue.textContent = '无效的日期时间';
@@ -273,8 +276,7 @@ class TimestampConverter {
     }
 
     // 将东八区时间转换为 UTC 时间戳
-    // 东八区时间 = UTC + 8 小时
-    // 所以：UTC 时间 = 东八区时间 - 8 小时
+    // 东八区时间 = UTC + 8 小时，所以 UTC = 东八区 - 8 小时
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes, seconds] = timePart.split(':').map(Number);
 

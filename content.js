@@ -438,9 +438,10 @@ class UnixTimestampConverter {
     const second = parts.find(p => p.type === 'second')?.value;
 
     // 手动格式化，确保日期部分使用 - 分隔符
-    const dateStr = `${year}-${month}-${day}`;
-    const timeStr = `${hour}:${minute}:${second}`;
-    return `${dateStr} ${timeStr}`;
+    // 使用 String() 显式转换，避免任何意外行为
+    const dateStr = String(year) + '-' + String(month) + '-' + String(day);
+    const timeStr = String(hour) + ':' + String(minute) + ':' + String(second);
+    return dateStr + ' ' + timeStr;
   }
 
   showTooltip(text) {
