@@ -3,6 +3,7 @@ class UnixTimestampConverter {
     this.autoScanEnabled = false;
     this.currentDomain = '';
     this.autoTooltips = new Map();
+    this.tooltipToNodeMap = new Map(); // tooltip -> 原始 textNode
     this.isScanning = false;
     this.debounceTimer = null;
     this.pendingScan = false;
@@ -49,12 +50,41 @@ class UnixTimestampConverter {
   startAutoScan() {
     if (!this.observer) {
       this.observer = new MutationObserver((mutations) => {
-        // 只在添加/删除节点时触发
-        const hasNodeChanges = mutations.some(m =>
-          m.addedNodes.length > 0 || m.removedNodes.length > 0
-        );
+        // 检查被删除的节点，清除对应的 tooltip
+        const tooltipsToRemove = [];
+        this.autoTooltips.forEach((tooltipData, key) => {
+          const { tooltip, textNode } = tooltipData;
+          // 检查 textNode 是否还在 DOM 中
+          if (!document.body.contains(textNode)) {
+            tooltipsToRemove.push(key);
+          }
+        });
 
-        if (hasNodeChanges) {
+        // 删除失效的 tooltip
+        tooltipsToRemove.forEach(key => {
+          const data = this.autoTooltips.get(key);
+          if (data && data.tooltip && data.tooltip.parentNode) {
+            data.tooltip.remove();
+          }
+          this.autoTooltips.delete(key);
+          this.tooltipToNodeMap.delete(data.tooltip);
+        });
+
+        // 检查新添加的节点
+        const hasNewNodes = mutations.some(m => {
+          for (let i = 0; i < m.addedNodes.length; i++) {
+            const node = m.addedNodes[i];
+            if (node.nodeType === Node.ELEMENT_NODE &&
+                (node.classList?.contains('unix-timestamp-tooltip') ||
+                 node.querySelector?.('.unix-timestamp-tooltip'))) {
+              continue;
+            }
+            return true;
+          }
+          return false;
+        });
+
+        if (hasNewNodes) {
           this.queueAutoScan();
         }
       });
@@ -120,6 +150,38 @@ class UnixTimestampConverter {
         this.handleSelection();
       }
     });
+
+    // 监听页面刷新和 URL 变化
+    window.addEventListener('beforeunload', this.handlePageUnload.bind(this));
+    window.addEventListener('popstate', this.handlePageRefresh.bind(this));
+    window.addEventListener('pageshow', this.handlePageShow.bind(this));
+  }
+
+  handlePageUnload() {
+    // 页面即将卸载，清除所有悬浮提示框
+    this.clearAutoTooltips();
+    this.removeExistingTooltip();
+  }
+
+  handlePageRefresh() {
+    // URL 变化（SPA 路由切换等），清除悬浮提示框
+    this.clearAutoTooltips();
+    this.removeExistingTooltip();
+    // 如果自动扫描启用，重新扫描
+    if (this.autoScanEnabled) {
+      setTimeout(() => this.autoScanPage(), 100);
+    }
+  }
+
+  handlePageShow(event) {
+    // 页面显示（包括刷新），如果是持久化加载（如前进/后退），重新扫描
+    if (event.persisted) {
+      this.clearAutoTooltips();
+      this.removeExistingTooltip();
+      if (this.autoScanEnabled) {
+        setTimeout(() => this.autoScanPage(), 100);
+      }
+    }
   }
 
   handleSelection() {
@@ -287,8 +349,9 @@ class UnixTimestampConverter {
       tooltip.style.left = left + 'px';
       tooltip.style.top = top + 'px';
 
-      // 保存提示信息
-      this.autoTooltips.set(timestampKey, tooltip);
+      // 保存提示信息和原始节点引用
+      this.autoTooltips.set(timestampKey, { tooltip, textNode });
+      this.tooltipToNodeMap.set(tooltip, textNode);
 
       // 自动提示只在页面显示，不自动消失
     } catch (err) {
@@ -297,12 +360,14 @@ class UnixTimestampConverter {
   }
 
   clearAutoTooltips() {
-    this.autoTooltips.forEach(tooltip => {
+    this.autoTooltips.forEach((data) => {
+      const tooltip = data.tooltip;
       if (tooltip && tooltip.parentNode) {
         tooltip.remove();
       }
     });
     this.autoTooltips.clear();
+    this.tooltipToNodeMap.clear();
   }
 
   parseTimestamp(text) {
