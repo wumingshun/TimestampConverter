@@ -144,6 +144,10 @@ class TimestampConverter {
     const currentYear = new Date().getFullYear();
 
     if (num < 1000000000000) {
+      // 秒级时间戳校验：必须是10位且以1开头
+      if (num < 1000000000 || num >= 2000000000 || String(num)[0] !== '1') {
+        return null;
+      }
       const date = new Date(num * 1000);
       if (date.getFullYear() >= 1970 && date.getFullYear() <= currentYear + 10) {
         return { timestamp: num * 1000, type: '秒级时间戳' };
@@ -151,6 +155,10 @@ class TimestampConverter {
     }
 
     if (num >= 1000000000000 && num < 1000000000000000) {
+      // 毫秒级时间戳校验：必须以1开头
+      if (String(num)[0] !== '1') {
+        return null;
+      }
       const date = new Date(num);
       if (date.getFullYear() >= 1970 && date.getFullYear() <= currentYear + 10) {
         return { timestamp: num, type: '毫秒级时间戳' };
@@ -158,6 +166,10 @@ class TimestampConverter {
     }
 
     if (num >= 1000000000000000 && num < 1000000000000000000) {
+      // 微秒级时间戳校验：必须以1开头
+      if (String(num)[0] !== '1') {
+        return null;
+      }
       const date = new Date(num / 1000);
       if (date.getFullYear() >= 1970 && date.getFullYear() <= currentYear + 10) {
         return { timestamp: num / 1000, type: '微秒级时间戳' };
@@ -165,6 +177,10 @@ class TimestampConverter {
     }
 
     if (num >= 1000000000000000000 && num < 1000000000000000000000) {
+      // 纳秒级时间戳校验：必须以1开头
+      if (String(num)[0] !== '1') {
+        return null;
+      }
       const date = new Date(num / 1000000);
       if (date.getFullYear() >= 1970 && date.getFullYear() <= currentYear + 10) {
         return { timestamp: num / 1000000, type: '纳秒级时间戳' };
